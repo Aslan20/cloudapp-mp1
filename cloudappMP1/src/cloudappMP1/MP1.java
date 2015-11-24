@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.lang.reflect.Array;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -67,67 +69,63 @@ public class MP1 {
 		// Return first 20 of wordcount dictionary
 
 		List<String> titles = new ArrayList<String>();
-		
+
 		// http://stackoverflow.com/questions/4716503/best-way-to-read-a-text-file-in-java
 		FileReader fr = new FileReader(this.inputFileName);
-		BufferedReader  textReader = new BufferedReader(fr);
+		BufferedReader textReader = new BufferedReader(fr);
 		try {
 			String line = textReader.readLine();
-			while (line != null){
+			while (line != null) {
 				titles.add(line);
-				line = textReader.readLine(); 
+				line = textReader.readLine();
 			}
-		}
-		finally {
+		} finally {
 			textReader.close();
 		}
-		
+
 		Integer[] indexes = this.getIndexes();
-		
+
 		// http://stackoverflow.com/questions/2607289/converting-array-to-list-in-java
 		List<String> stopWords = new ArrayList<String>(Arrays.asList(this.stopWordsArray));
-		
+
 		List<String> onlyIndexedTitles = new ArrayList<String>();
-		
+
 		for (Integer i : indexes) {
 			onlyIndexedTitles.add(titles.get(i));
 		}
-		
+
 		// http://www.mkyong.com/java/how-to-sort-a-map-in-java/
-		Map<String, Integer> wordCount = new HashMap<String,Integer>(); 
-		
-		for (String title : onlyIndexedTitles){
+		Map<String, Integer> wordCount = new HashMap<String, Integer>();
+
+		for (String title : onlyIndexedTitles) {
 			// http://docs.oracle.com/javase/7/docs/api/java/util/StringTokenizer.html
 			StringTokenizer st = new StringTokenizer(title, this.delimiters);
-			while(st.hasMoreTokens()){
-				String word = st.nextToken();
-				if (! stopWords.contains(word))
-				{
-					if (! wordCount.containsKey(word))
+			while (st.hasMoreTokens()) {
+				String word = st.nextToken().toLowerCase().trim();
+				if (!stopWords.contains(word)) {
+					if (!wordCount.containsKey(word))
 						wordCount.put(word, 1);
 					else
-						wordCount.put(word, wordCount.get(word)+1);
+						wordCount.put(word, wordCount.get(word) + 1);
 				}
 			}
 		}
-		
+
 		Map<String, Integer> sortedWordCount = sortByComparator(wordCount);
-		
+
 		Integer i = 0;
-		for( Map.Entry<String,Integer> entry : sortedWordCount.entrySet()) {
+		for (Map.Entry<String, Integer> entry : sortedWordCount.entrySet()) {
 			if (i < 20) {
-				ret[i] = entry.getKey();
+				ret[i] = entry.getKey();// + " " +entry.getValue();
 				i++;
-			}
-			else
-			{
+			} else {
 				break;
 			}
 		}
-		
+
 		return ret;
 	}
-	
+
 	public static void main(String[] args) throws Exception {
 		if (args.length < 1) {
 			System.out.println("MP1 <User ID>");
@@ -142,20 +140,21 @@ public class MP1 {
 		}
 	}
 
-	
 	private static Map<String, Integer> sortByComparator(Map<String, Integer> unsortMap) {
- 		// Entirely taken from
+		// Entirely taken from
 		// http://www.mkyong.com/java/how-to-sort-a-map-in-java/
-		
+
 		// Convert Map to List
-		List<Map.Entry<String, Integer>> list = 
-			new LinkedList<Map.Entry<String, Integer>>(unsortMap.entrySet());
+		List<Map.Entry<String, Integer>> list = new LinkedList<Map.Entry<String, Integer>>(unsortMap.entrySet());
 
 		// Sort list with comparator, to compare the Map values
 		Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
-			public int compare(Map.Entry<String, Integer> o1,
-                                           Map.Entry<String, Integer> o2) {
-				return (o1.getValue()).compareTo(o2.getValue());
+			public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+				int result =(o2.getValue()).compareTo(o1.getValue());
+				if (result != 0) 
+						return result;
+				else 
+					return o1.getKey().compareTo(o2.getKey());
 			}
 		});
 
@@ -166,5 +165,5 @@ public class MP1 {
 			sortedMap.put(entry.getKey(), entry.getValue());
 		}
 		return sortedMap;
-	}	
+	}
 }
